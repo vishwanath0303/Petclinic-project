@@ -47,17 +47,26 @@ pipeline {
                 sh " mvn clean install"
             }
         }
-        stage("Build & Test "){
-            steps{
-                sh "docker build . -t petclinic:$BUILD_NUMBER "
+              stage('Build & tag docker image') {
+            steps {
+                script{
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        sh "docker build -t vkulkarni0303/petclinic:$BUILD_NUMBER ."
+    
+            
+                        
+                    }
+            }
             }
         }
-        
-        stage("PUSH TO REPO "){
-            steps{
-                withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                    sh "docker push vkulkarni0303/petclinic:$BUILD_NUMBER "
-                } 
+       stage('Push docker image') {
+            steps {
+                script{
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        sh "docker push vkulkarni0303/petclinic:$BUILD_NUMBER "
+                        
+                    }
+            }
             }
         }
          stage("Deploy "){
