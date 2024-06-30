@@ -47,19 +47,24 @@ pipeline {
                 sh " mvn clean install"
             }
         }
+        stage("Build & Test "){
+            steps{
+                sh "docker build . -t petclinic:$BUILD_NUMBER "
+            }
+        }
         
         stage("PUSH TO REPO "){
             steps{
                 withCredentials([usernamePassword(credentialsId:"docker-cred",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]) {
                     sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass} "
-                    sh "docker tag node-app-demo  ${env.dockerHubUser}/Petclinic:latest"
-                    sh "docker push ${env.dockerHubUser}/Petclinic:latest"
+                    sh "docker tag petclinic  ${env.dockerHubUser}/petclinic:$BUILD_NUMBER "
+                    sh "docker push ${env.dockerHubUser}/petclinic:$BUILD_NUMBER "
                 } 
             }
         }
          stage("Deploy "){
             steps{
-                sh "docker run --name petclinic -d -p 8090:8090 Petclinic:latest "
+                sh "docker run --name petclinic -d -p 8090:8090 petclinic:$BUILD_NUMBER "
             }
         }
     }
