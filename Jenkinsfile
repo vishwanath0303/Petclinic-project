@@ -59,14 +59,12 @@ pipeline {
             }
             }
         }
-       stage('Push docker image') {
-            steps {
-                script{
-                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "docker push vkulkarni0303/petclinic:$BUILD_NUMBER "
-                        
-                    }
-            }
+      stage("PUSH TO REPO "){
+            steps{
+                withCredentials([usernamePassword(credentialsId:"docker-cred",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]) {
+                    sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass} "
+                    sh "docker push ${env.dockerHubUser}/petclinic:$BUILD_NUMBER "
+                } 
             }
         }
          stage("Deploy "){
