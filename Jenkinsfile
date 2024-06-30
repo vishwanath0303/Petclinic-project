@@ -51,7 +51,7 @@ pipeline {
             steps {
                 script{
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "docker build -t vkulkarni0303/petclinic ."
+                        sh "docker build -t vkulkarni0303/petclinic:$BUILD_NUMBER ."
     
             
                         
