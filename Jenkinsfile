@@ -51,7 +51,7 @@ pipeline {
             steps {
                 script{
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "docker build -t vkulkarni0303/petclinic:$BUILD_NUMBER ."
+                        sh "docker build -t petclinic:latest ."
     
             
                         
@@ -63,14 +63,14 @@ pipeline {
             steps{
                 withCredentials([usernamePassword(credentialsId:"docker-cred",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]) {
                     sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass} "
-                    sh "docker tag petclinic  ${env.dockerHubUser}/petclinic:$BUILD_NUMBER "
-                    sh "docker push ${env.dockerHubUser}/petclinic:$BUILD_NUMBER "
+                    sh "docker tag petclinic  ${env.dockerHubUser}/petclinic:latest "
+                    sh "docker push ${env.dockerHubUser}/petclinic:latest "
                 } 
             }
         }
          stage("Deploy "){
             steps{
-                sh "docker run --name petclinic -d -p 8090:8090 petclinic:$BUILD_NUMBER "
+                sh "docker run --name petclinic -d -p 8090:8090 petclinic:latest "
             }
         }
     }
