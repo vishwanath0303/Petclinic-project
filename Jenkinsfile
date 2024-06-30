@@ -14,7 +14,7 @@ pipeline {
         
         stage("Git Checkout"){
             steps{
-                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/writetoritika/Petclinic.git'
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/vishwanath0303/Petclinic.git'
             }
         }
         
@@ -40,13 +40,7 @@ pipeline {
                 }
             }
         }
-        
-        stage("OWASP Dependency Check"){
-            steps{
-                dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-            }
-        }
+    
         
          stage("Build"){
             steps{
@@ -54,28 +48,18 @@ pipeline {
             }
         }
         
-        stage("Docker Build & Push"){
+        stage("PUSH TO REPO "){
             steps{
-                script{
-                   withDockerRegistry(credentialsId: ''9c41157e-870c-4aae-8e00-cab3a8b216bb', toolName: 'docker') {
-                        
-                        sh "docker build -t image1 ."
-                        sh "docker tag image1 writetoritika/pet-clinic123:latest "
-                        sh "docker push writetoritika/pet-clinic123:latest "
-                    }
-                }
+                withCredentials([usernamePassword(credentialsId:"docker-cred",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]) {
+                    sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass} "
+                    sh "docker tag node-app-demo  ${env.dockerHubUser}/Petclinic:latest"
+                    sh "docker push ${env.dockerHubUser}/Petclinic:latest"
+                } 
             }
         }
-        
-        stage("TRIVY"){
+         stage("Deploy "){
             steps{
-                sh " trivy image writetoritika/pet-clinic123:latest"
-            }
-        }
-        
-        stage("Deploy To Tomcat"){
-            steps{
-                sh "cp  /var/lib/jenkins/workspace/CI-CD/target/petclinic.war /opt/apache-tomcat-9.0.65/webapps/ "
+                sh "docker run --name petclinic -d -p 8090:8090 Petclinic:latest "
             }
         }
     }
