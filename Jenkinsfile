@@ -51,7 +51,7 @@ pipeline {
             steps {
                 script{
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "docker build -t vkulkarni0303/petclinic:$BUILD_NUMBER ."
+                        sh "docker build -t vkulkarni0303/petclinic ."
     
             
                         
@@ -63,6 +63,7 @@ pipeline {
             steps{
                 withCredentials([usernamePassword(credentialsId:"docker-cred",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]) {
                     sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass} "
+                    sh "docker tag petclinic  ${env.dockerHubUser}/petclinic:$BUILD_NUMBER "
                     sh "docker push ${env.dockerHubUser}/petclinic:$BUILD_NUMBER "
                 } 
             }
